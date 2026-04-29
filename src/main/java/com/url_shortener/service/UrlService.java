@@ -7,12 +7,13 @@ import com.url_shortener.exception.payload.UrlExpiredException;
 import com.url_shortener.mapper.UrlMapper;
 import com.url_shortener.model.Url;
 import com.url_shortener.repository.UrlRepository;
-import com.url_shortener.util.Base62Util;
+import com.url_shortener.util.ExpirationUtil;
 import com.url_shortener.util.UrlValidation;
 import lombok.RequiredArgsConstructor;
 import org.hashids.Hashids;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Service
@@ -25,8 +26,14 @@ public class UrlService {
 
     public ShortenResponse shortenUrl(ShortenRequest shortenRequest) {
         urlValidation.validate(shortenRequest.getUrl());
+        Url url = new Url();
+        url.setOriginalUrl(shortenRequest.getUrl());
 
-        Url url = urlMapper.toEntity(shortenRequest.getUrl(), shortenRequest.getExpireDays());
+        // parse expiration
+        if (shortenRequest.getExpireIn() != null) {
+            Duration duration = ExpirationUtil.parse(shortenRequest.getExpireIn());
+            url.setExpiresAt(LocalDateTime.now().plus(duration));
+        }
         urlRepository.save(url);
 
         // Encode = hashids

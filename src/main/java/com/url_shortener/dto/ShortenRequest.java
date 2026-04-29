@@ -9,6 +9,6 @@ public class ShortenRequest {
     @NotBlank(message = "URL must not be empty")
     private String url;
 
-    @Min(value = 0, message = "Expire days must be >= 0")
-    private Integer expireDays = 0;
+    @NotBlank(message = "Expiration time must not be empty")
+    private String expireIn;
 }

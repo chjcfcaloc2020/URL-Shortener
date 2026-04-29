@@ -29,6 +29,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<?> handleInvalidFormat(IllegalArgumentException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Invalid expiration format (e.g., 15m, 1h, 1d)");
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidation(MethodArgumentNotValidException ex) {
         String error = ex.getBindingResult()

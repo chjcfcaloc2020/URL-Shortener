@@ -6,5 +6,5 @@ import lombok.Data;
 @Builder
 @Data
 public class ShortenResponse {
-    private String shortUrl;
+    private String shortCode;
 }

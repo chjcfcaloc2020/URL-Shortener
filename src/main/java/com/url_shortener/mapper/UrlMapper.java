@@ -21,7 +21,7 @@ public class UrlMapper {
 
     public ShortenResponse toResponse(String shortCode) {
         return ShortenResponse.builder()
-                .shortUrl("http://localhost:8080/" + shortCode)
+                .shortCode(shortCode)
                 .build();
     }
 }

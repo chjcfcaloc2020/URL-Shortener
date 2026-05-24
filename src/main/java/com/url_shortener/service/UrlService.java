@@ -23,6 +23,8 @@ public class UrlService {
     private final UrlMapper urlMapper;
     private final UrlValidation urlValidation;
     private final Hashids hashids;
+    private final CacheService cacheService;
+    private final ClickService clickService;
 
     public ShortenResponse shortenUrl(ShortenRequest shortenRequest) {
         urlValidation.validate(shortenRequest.getUrl());
@@ -45,13 +47,20 @@ public class UrlService {
     }
 
     public String getOriginalUrl(String code) {
+        // decode Hashids
         long[] decoded = hashids.decode(code);
-
         if (decoded.length == 0) {
             throw new NotFoundException("Invalid short URL");
         }
 
         Long id = decoded[0];
+        String cached = cacheService.get(code);
+        clickService.updateClicks(id);
+
+        if (cached != null) {
+            return cached;
+        }
+
         Url url = urlRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("URL not found"));
 
@@ -61,8 +70,8 @@ public class UrlService {
             throw new UrlExpiredException("URL has expired");
         }
 
-        url.setClicks(url.getClicks() + 1);
-        urlRepository.save(url);
+        // save cache
+        cacheService.save(code, url.getOriginalUrl());
 
         return url.getOriginalUrl();
     }

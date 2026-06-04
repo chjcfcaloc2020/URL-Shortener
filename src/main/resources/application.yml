@@ -1,36 +1,17 @@
 server:
-  port: ${PORT}
-  error:
-    include-stacktrace: never
+  port: ${PORT:8080}
 
 app:
   hashids:
     salt: ${SALT}
-    min-length: ${LINK_SIZE}
+    min-length: ${LINK_SIZE:6}
+
   cache:
     ttl: ${CACHE_TTL:3600}
+
   cleanup:
     cron: ${CLEANUP_CRON:0 */5 * * * *}
 
 spring:
   application:
     name: url-shortener
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      maximum-pool-size: 10
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      timeout: 2000
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect

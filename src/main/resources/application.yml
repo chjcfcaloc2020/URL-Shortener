@@ -6,12 +6,6 @@ app:
     salt: ${SALT}
     min-length: ${LINK_SIZE:6}
 
-  cache:
-    ttl: ${CACHE_TTL:3600}
-
-  cleanup:
-    cron: ${CLEANUP_CRON:0 */5 * * * *}
-
 spring:
   application:
     name: url-shortener

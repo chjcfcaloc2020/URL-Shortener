@@ -12,6 +12,7 @@ import com.url_shortener.util.UrlValidation;
 import lombok.RequiredArgsConstructor;
 import org.hashids.Hashids;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -33,8 +34,9 @@ public class UrlService {
 
         // parse expiration
         if (shortenRequest.getExpireIn() != null) {
-            Duration duration = ExpirationUtil.parse(shortenRequest.getExpireIn());
-            url.setExpiresAt(LocalDateTime.now().plus(duration));
+            url.setExpiresAt(
+                    ExpirationUtil.calculateExpiration(shortenRequest.getExpireIn())
+            );
         }
         urlRepository.save(url);
 
@@ -43,7 +45,13 @@ public class UrlService {
         url.setShortCode(code);
         urlRepository.save(url);
 
-        return urlMapper.toResponse(code);
+        return urlMapper.toResponse(
+                code,
+                url.getClicks(),
+                url.getOriginalUrl(),
+                url.getCreatedAt(),
+                url.getExpiresAt()
+        );
     }
 
     public String getOriginalUrl(String code) {
@@ -71,8 +79,18 @@ public class UrlService {
         }
 
         // save cache
-        cacheService.save(code, url.getOriginalUrl());
+        cacheService.save(code, url.getOriginalUrl(), ExpirationUtil.remaining(url.getExpiresAt()));
 
         return url.getOriginalUrl();
+    }
+
+    @Transactional
+    public void deleteUrl(String code) {
+        cacheService.delete(code);
+        int rows = urlRepository.deleteUrlByShortCode(code);
+
+        if (rows == 0) {
+            throw new NotFoundException("URL not found");
+        }
     }
 }

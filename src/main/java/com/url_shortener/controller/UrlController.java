@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/urls")
 @RequiredArgsConstructor
 public class UrlController {
     private final UrlService urlService;
@@ -18,5 +18,11 @@ public class UrlController {
     public ResponseEntity<ShortenResponse> shorten(
             @Valid @RequestBody ShortenRequest request) {
         return ResponseEntity.ok(urlService.shortenUrl(request));
+    }
+
+    @DeleteMapping("/{code}")
+    public ResponseEntity<Void> deleteUrl(@PathVariable String code) {
+        urlService.deleteUrl(code);
+        return ResponseEntity.noContent().build();
     }
 }

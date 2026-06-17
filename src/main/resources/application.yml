@@ -2,6 +2,8 @@ server:
   port: ${PORT:8080}
 
 app:
+  base-fe-url: ${BASE_FE_URL}
+
   hashids:
     salt: ${SALT}
     min-length: ${LINK_SIZE:6}

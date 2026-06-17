@@ -1,11 +1,14 @@
 package com.url_shortener.repository;
 
+import com.url_shortener.dto.ClicksResponse;
 import com.url_shortener.model.Url;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 public interface UrlRepository extends JpaRepository<Url, Long> {
     @Modifying
@@ -24,4 +27,16 @@ public interface UrlRepository extends JpaRepository<Url, Long> {
         WHERE u.shortCode = :shortCode
     """)
     int deleteUrlByShortCode(@Param("shortCode") String shortCode);
+
+    @Query("""
+        SELECT new com.url_shortener.dto.ClicksResponse(
+            u.shortCode,
+            u.clicks
+        )
+        FROM Url u
+        WHERE u.shortCode IN :shortCodes
+    """)
+    List<ClicksResponse> findClicksByShortCode(
+            @Param("shortCodes") List<String> shortCodes
+    );
 }

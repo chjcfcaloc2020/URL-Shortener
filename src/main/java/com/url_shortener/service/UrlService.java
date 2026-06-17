@@ -1,5 +1,7 @@
 package com.url_shortener.service;
 
+import com.url_shortener.dto.BatchClickRequest;
+import com.url_shortener.dto.ClicksResponse;
 import com.url_shortener.dto.ShortenRequest;
 import com.url_shortener.dto.ShortenResponse;
 import com.url_shortener.exception.payload.NotFoundException;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -92,5 +95,10 @@ public class UrlService {
         if (rows == 0) {
             throw new NotFoundException("URL not found");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<ClicksResponse> getClicks(BatchClickRequest request) {
+        return urlRepository.findClicksByShortCode(request.getShortCodes());
     }
 }

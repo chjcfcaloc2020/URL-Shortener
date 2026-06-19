@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>SHORT.MONO // DECRYPTING...</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+          font-family: 'Space Mono', monospace;
+          background-color: #fbf9f8;
+          color: #1b1c1b;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          margin: 0;
+          overflow: hidden;
+        }
+        .container {
+          border: 2px solid #78716B;
+          padding: 40px;
+          text-align: left;
+          box-shadow: 4px 4px 0px 0px #106e00;
+          width: 90%;
+          max-width: 600px;
+          box-sizing: border-box;
+        }
+        .title { color: #106e00; font-weight: bold; margin-bottom: 20px; font-size: 20px; }
+        .log { font-size: 13px; line-height: 1.6; color: #4b5563; }
+        .green { color: #106e00; font-weight: bold; }
+        .blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+        .progress { background: #eae8e7; border: 1px solid #78716B; height: 16px; margin: 20px 0; position: relative; }
+        .bar { background: #106e00; height: 100%; width: 0%; animation: fill 0.8s ease-out forwards; }
+        @keyframes fill { to { width: 100%; } }
+    </style>
+    <meta http-equiv="refresh" th:content="'1.2;url=' + ${originalUrl}">
+</head>
+<body>
+<div class="container">
+    <div class="title">&gt;_ INBOUND_PROTOCOL_RESOLVING</div>
+    <div class="log">
+        <div>[OK] INPUT_ID: <span class="green" th:text="${code}"></span></div>
+        <div>[OK] TARGET_DECRYPTED: <span th:text="${displayUrl}"></span></div>
+        <div>[OK] BYPASS_SECURE_ROUTING</div>
+        <div>[OK] REDIRECTING_USER <span class="blink">_</span></div>
+    </div>
+    <div class="progress">
+        <div class="bar"></div>
+    </div>
+    <div class="log" style="text-align: center; font-size: 11px;">
+        If you are not redirected within 2 seconds, <a th:href="${originalUrl}" style="color: #106e00; font-weight: bold;">click here</a>.
+    </div>
+</div>
+</body>
+</html>

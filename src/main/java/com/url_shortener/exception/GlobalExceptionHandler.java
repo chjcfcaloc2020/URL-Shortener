@@ -19,11 +19,6 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    @ExceptionHandler(UrlExpiredException.class)
-    public ResponseEntity<?> handleExpired(UrlExpiredException ex) {
-        return buildResponse(HttpStatus.GONE, ex.getMessage());
-    }
-
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<?> handleBadRequest(BadRequestException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());

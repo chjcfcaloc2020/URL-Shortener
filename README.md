@@ -361,39 +361,6 @@ docker run -p 8080:8080 short-mono
 
 ---
 
-# 📸 Screenshots
-
-> Coming soon...
-
----
-
-# 🚀 Roadmap
-
-- QR Code generation
-- Custom Alias
-- User Authentication
-- User Dashboard
-- Password-protected URLs
-- Rate Limiting
-- Swagger Documentation
-- Prometheus & Grafana Monitoring
-
----
-
-# 🤝 Contributing
-
-Contributions are welcome!
-
-Feel free to fork the project and submit a Pull Request.
-
----
-
-# 📄 License
-
-Licensed under the MIT License.
-
----
-
 <div align="center">
 
 ⭐ If you like this project, don't forget to give it a Star!

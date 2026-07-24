@@ -2,16 +2,24 @@
 
 # 🚀 Short.Mono
 
-### A Production-Ready URL Shortener Platform built with Spring Boot 4 & React
+### Production-ready URL Shortener Platform
 
-Generate secure short URLs, cache redirects with Redis, manage expiration policies, and deploy seamlessly with Docker.
+A modern URL shortening platform built with **Spring Boot 4**, **React**, **MySQL**, and **Redis**, featuring Hashids-based URL generation, configurable expiration policies, redirect caching, click analytics, and cloud deployment.
+
+<p>
 
 ![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0-green?style=for-the-badge)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4-success?style=for-the-badge)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge)
 ![MySQL](https://img.shields.io/badge/MySQL-8-blue?style=for-the-badge)
 ![Redis](https://img.shields.io/badge/Redis-Upstash-red?style=for-the-badge)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-success?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge)
+
+</p>
+
+🌐 **Live Demo**
+
+Frontend: https://short-mono-cfj3z5d53-ntc2.vercel.app/
 
 </div>
 
@@ -19,11 +27,13 @@ Generate secure short URLs, cache redirects with Redis, manage expiration polici
 
 # 📖 Overview
 
-**Short.Mono** is a modern URL shortening platform designed with scalability and production deployment in mind.
+**Short.Mono** is a production-ready URL Shortener that transforms long URLs into compact, secure, and shareable links.
 
-Instead of generating random UUIDs, the application uses **Base62 encoding** to create compact, user-friendly short URLs.
+Instead of exposing sequential database IDs or generating random UUIDs, the application uses **Hashids** with a configurable **Salt** to generate deterministic, URL-safe short codes.
 
-The system supports configurable expiration times, Redis caching for fast redirects, click analytics, automatic cleanup of expired links, and a clean layered architecture following Spring Boot best practices.
+To improve performance, redirect requests are cached in **Redis (Upstash)**, significantly reducing database queries for frequently accessed links.
+
+The project follows **Clean Architecture** principles with DTOs, validation, global exception handling, layered services, and cloud deployment.
 
 ---
 
@@ -31,80 +41,95 @@ The system supports configurable expiration times, Redis caching for fast redire
 
 ## 🔗 URL Shortening
 
-- Generate unique short URLs using **Base62 encoding**
-- Configurable domain
-- Collision-free short code generation
-- RESTful API
+- Generate short URLs using **Hashids**
+- Configurable Hashids Salt
+- Configurable minimum hash length
+- URL-safe short codes
+- Collision-free generation
 
 ---
 
-## ⏳ Flexible Expiration Policy
+## ⏳ Flexible Expiration
 
-Support multiple expiration strategies:
+Supports multiple expiration policies:
 
 - 15 minutes
 - 30 minutes
 - 1 hour
 - 1 day
-- Custom duration
 - Never expire
 
-Expired links automatically become inaccessible.
+Expired URLs automatically become inaccessible.
 
 ---
 
 ## ⚡ High Performance Redirect
 
-- Redis cache (Upstash)
-- Database fallback
-- Automatic cache refresh
-- Low latency redirect
-
-Flow:
+Redirect flow:
 
 ```
 Browser
       │
       ▼
-Short URL
+ Short URL
       │
       ▼
-Redis Cache
- ┌────────────┐
- │ Hit        │────► Redirect
- └────────────┘
+ Redis Cache
+   │        │
+ Hit       Miss
+   │        │
+   │        ▼
+   │     MySQL
+   │        │
+   └────────┘
       │
       ▼
-Database
+ Landing Page
       │
       ▼
-Save Cache
-      │
-      ▼
-Redirect
+ Redirect
 ```
+
+Features
+
+- Redis Cache (Upstash)
+- Automatic cache refresh
+- Database fallback
+- Fast redirect response
+
+---
+
+## 🖥 Redirect Landing Page
+
+Instead of redirecting immediately, users will first see a transition page displaying:
+
+- Short Code
+- Destination URL
+- Redirect progress animation
+
+If the URL has expired, a dedicated error page is displayed instead.
 
 ---
 
 ## 📊 Click Analytics
 
-Track total visits for every short URL.
+Track total visits for every shortened URL.
 
-Support batch statistics API.
-
-Example:
+Batch statistics API:
 
 ```http
 POST /api/urls/batch/clicks
 ```
 
+Request
+
 ```json
 {
-    "shortCodes": [
-        "13KpAO",
-        "03403G",
-        "eEZo39"
-    ]
+  "shortCodes": [
+    "13KpAO",
+    "03403G",
+    "eEZo39"
+  ]
 }
 ```
 
@@ -112,14 +137,14 @@ Response
 
 ```json
 [
-    {
-        "shortCode": "13KpAO",
-        "clicks": 145
-    },
-    {
-        "shortCode": "03403G",
-        "clicks": 52
-    }
+  {
+    "shortCode": "13KpAO",
+    "clicks": 145
+  },
+  {
+    "shortCode": "03403G",
+    "clicks": 82
+  }
 ]
 ```
 
@@ -127,44 +152,81 @@ Response
 
 ## 🧹 Automatic Cleanup
 
-A scheduled job periodically removes expired URLs.
+Expired URLs are automatically removed by a scheduled task.
 
 - Spring Scheduler
 - Configurable Cron Expression
 
 ---
 
-## 🖥 Redirect Landing Page
+# 🔒 Hashids Flow
 
-Instead of redirecting immediately, users see a stylish transition page before being redirected.
+```
+Original URL
+      │
+      ▼
+Save into MySQL
+      │
+      ▼
+Generated ID
+      │
+      ▼
+Hashids.encode(id)
+      │
+      ▼
+Short Code
+      │
+      ▼
+https://your-domain/AbX91P
+```
 
-Expired links display a custom error page.
+During redirect:
+
+```
+Short Code
+      │
+      ▼
+Hashids.decode()
+      │
+      ▼
+Database ID
+      │
+      ▼
+Redis Cache
+      │
+      ▼
+MySQL
+      │
+      ▼
+Original URL
+```
 
 ---
 
 # 🏗 Architecture
 
 ```
-Client
-   │
-   ▼
-Spring Boot API
-   │
-   ├────────────► Redis
-   │                │
-   │                ▼
-   │            Cached URL
-   │
-   ▼
-MySQL Database
+                React Frontend
+                       │
+                       ▼
+             Spring Boot REST API
+                       │
+        ┌──────────────┴──────────────┐
+        ▼                             ▼
+   Redis (Upstash)               MySQL (Railway)
+        │                             │
+        └──────────────┬──────────────┘
+                       ▼
+                Redirect Response
 ```
 
 ---
 
-# 🏛 Project Structure
+# 📂 Project Structure
 
 ```
 src
+├── config
 ├── controller
 ├── dto
 │   ├── request
@@ -172,65 +234,66 @@ src
 ├── entity
 ├── exception
 ├── repository
+├── scheduler
 ├── service
 ├── util
-├── config
-└── scheduler
+└── resources
+    └── templates
 ```
 
-Architecture Principles
+Architecture
 
 - DTO Pattern
-- Service Layer
 - Repository Pattern
-- Global Exception Handler
+- Service Layer
 - Validation
-- Dependency Injection
-- Clean Code
+- Global Exception Handling
+- Clean Architecture
 
 ---
 
 # 🛠 Tech Stack
 
-## Backend
+### Backend
 
 - Java 21
 - Spring Boot 4
 - Spring Data JPA
 - Hibernate
 - Maven
+- Hashids
 
-## Database
-
-- MySQL
-
-## Cache
-
-- Redis
-- Upstash Redis
-
-## Frontend
+### Frontend
 
 - React
+- Vite
 - Tailwind CSS
 
-## Deployment
+### Database
+
+- MySQL (Railway)
+
+### Cache
+
+- Redis (Upstash)
+
+### Deployment
 
 - Docker
 - Render
 - Railway
-- Upstash
+- Vercel
 
 ---
 
-# 📌 API Endpoints
+# 📌 API
 
 | Method | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/api/shorten` | Create short URL |
-| GET | `/{code}` | Redirect to original URL |
-| DELETE | `/api/urls/{code}` | Delete short URL |
-| POST | `/api/urls/batch/clicks` | Get click statistics |
+|----------|----------|-------------|
+| POST | `/api/shorten` | Create Short URL |
+| GET | `/{code}` | Redirect |
+| DELETE | `/api/urls/{code}` | Delete Short URL |
+| POST | `/api/urls/batch/clicks` | Batch Click Statistics |
 
 ---
 
@@ -249,21 +312,21 @@ LINK_SIZE=
 
 ---
 
-# 🚀 Run Locally
+# 🚀 Getting Started
 
-Clone project
-
-```bash
-git clone https://github.com/yourusername/url-shortener.git
-```
-
-Move into project
+Clone the repository
 
 ```bash
-cd url-shortener
+git clone https://github.com/<your-username>/short-mono.git
 ```
 
-Run
+Navigate to the project
+
+```bash
+cd short-mono
+```
+
+Run the application
 
 ```bash
 ./mvnw spring-boot:run
@@ -287,24 +350,33 @@ docker run -p 8080:8080 short-mono
 
 ---
 
-# 📈 Future Improvements
+# ☁ Cloud Deployment
 
-- User Authentication (JWT)
-- User Dashboard
-- QR Code Generator
-- Custom Alias
-- Password Protected Links
-- Rate Limiting
-- Swagger Documentation
-- Monitoring (Prometheus + Grafana)
-- Docker Compose
-- Kubernetes Deployment
+| Service | Platform |
+|----------|----------|
+| Frontend | Vercel |
+| Backend | Render |
+| Database | Railway MySQL |
+| Cache | Upstash Redis |
 
 ---
 
 # 📸 Screenshots
 
 > Coming soon...
+
+---
+
+# 🚀 Roadmap
+
+- QR Code generation
+- Custom Alias
+- User Authentication
+- User Dashboard
+- Password-protected URLs
+- Rate Limiting
+- Swagger Documentation
+- Prometheus & Grafana Monitoring
 
 ---
 
@@ -318,12 +390,14 @@ Feel free to fork the project and submit a Pull Request.
 
 # 📄 License
 
-This project is licensed under the MIT License.
+Licensed under the MIT License.
 
 ---
 
 <div align="center">
 
-Made with ❤️ using Spring Boot
+⭐ If you like this project, don't forget to give it a Star!
+
+Made with ❤️ using Spring Boot & React
 
 </div>
